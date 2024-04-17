@@ -1,0 +1,55 @@
+import matplotlib.pyplot as plt
+import csv
+import math
+import os 
+from matplotlib.ticker import MaxNLocator
+import japanize_matplotlib
+os.chdir("/Users/taniguchirei/Desktop/人間情報工学実験結果")
+f = open("Experiment_data_yano.csv","r",encoding="shift-jis")
+reader1 = csv.reader(f)
+word_list = [row for row in reader1]
+new_list = []
+x =[]
+rtl =[]
+mtl =[]
+for a in word_list:
+  W = float(a[2])
+  D = float(a[1])
+  rt =float(a[3])
+  mt = float(a[4])
+  nanido = math.log2(2*D/W)
+  if not nanido in range(0,8)or mt <0.01 or mt>1:
+    #print(a)
+    continue
+  x.append(nanido)
+  rtl.append(rt)
+  mtl.append(mt)
+  new_list.append([W,D,rt,mt,nanido])
+
+fig, ax = plt.subplots()
+avg_x =[0,1,2,3,4,5,6,7]
+avg_list = [0,0,0,0,0,0,0,0]
+
+for i in range(0,8):
+  count =0
+  for a in new_list:
+    if a[4]== i:
+      avg_list[i]+=a[3]
+      count+=1
+  avg_list[i]/=count
+
+with open("avg_yano.csv","w") as k:
+    writer = csv.writer(k)
+    for i in range(0,8):
+
+        writer.writerows([[i,avg_list[i]]])
+ax.scatter(x,mtl,marker='o',label="実測値")
+ax.plot(avg_x,avg_list,marker='o',color='orange',label="平均値")
+ax.legend(fontsize=12) #これで凡例が表示されるらしい
+ax.yaxis.set_major_locator(MaxNLocator(10))
+ax.set_ylim(0,1)
+ax.set_xlabel("Difficulty (ID)")
+ax.set_ylabel("Time (s)")
+
+fig.suptitle("反応時間ー難易度の関係(永長)")
+plt.show()
